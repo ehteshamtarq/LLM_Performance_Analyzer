@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poly:ital@0;1&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Rajdhani:wght@300;400;500;600;700&family=Signika:wght@300..700&family=VT323&display=swap');
+
+*{
+    padding: 0;
+    margin: 0;
+}
+.navbar{
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 10px;
+    border-radius: 20px;
+}
+
+.logo{
+    font-size: 20px;
+    font-weight: 600;
+    font-family: 'Poppins';
+}
+
+a{
+    text-decoration: none;
+    color: black;
+}

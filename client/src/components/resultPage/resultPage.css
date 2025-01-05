@@ -1,0 +1,19 @@
+.flex{
+    height: 500px;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.heading{
+    margin-bottom: 50px;
+}
+
+.table-section{
+    padding: 20px;
+}
+
+th, td{
+    padding: 8px;
+    text-align: left;
+}

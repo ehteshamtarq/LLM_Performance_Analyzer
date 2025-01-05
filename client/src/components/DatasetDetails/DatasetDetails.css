@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poly:ital@0;1&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Rajdhani:wght@300;400;500;600;700&family=Signika:wght@300..700&family=VT323&display=swap');
+
+*{
+    font-family: 'Poppins'
+}
+.dataset_name{
+    margin-left: 40px;
+    margin-bottom: 30px;
+}
+
+.prompt_input{
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.prompt_input input{
+    padding: 10px;
+    width: 50%;
+    margin-bottom: 30px;
+}
+
+.prompts{
+    margin: 30px 30px;
+    margin-left: 80px;
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.prompts div{
+    width: 90%;
+    padding: 10px 10px;
+    border: 1px solid black;
+    cursor: pointer;
+}
+
+.table{
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+    margin: 30px 50px;
+    margin-top: 50px;
+    padding: 10px;
+    border-radius: 8px;
+  }
+  
+  table {
+    width: 90%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  thead {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  th, td {
+    padding: 12px 20px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  
+  th {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  td {
+    font-size: 14px;
+  }
+  
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
