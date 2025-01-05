@@ -1,54 +1,3 @@
-# # from rest_framework.views import APIView
-# # from rest_framework.response import Response
-# # from rest_framework import status
-# from .models import Dataset, Prompt, EvaluationResult
-# from .serializers import DatasetSerializer, PromptSerializer, EvaluationResultSerializer
-# # import pandas as pd
-
-# # class DatasetUploadView(APIView):
-# #     def post(self, request):
-# #         file = request.FILES['file']
-# #         dataset = Dataset.objects.create(name=file.name, file=file)
-# #         return Response(DatasetSerializer(dataset).data, status=status.HTTP_201_CREATED)
-
-# # class PromptView(APIView):
-# #     def post(self, request):
-# #         serializer = PromptSerializer(data=request.data)
-# #         if serializer.is_valid():
-# #             serializer.save()
-# #             return Response(serializer.data, status=status.HTTP_201_CREATED)
-# #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-# # class EvaluateView(APIView):
-# #     def post(self, request):
-# #         prompt = request.data.get("prompt")
-# #         dataset_id = request.data.get("dataset_id")
-# #         dataset = Dataset.objects.get(id=dataset_id)
-# #         df = pd.read_csv(dataset.file)
-# #         llm_response = "Sample Response" 
-# #         result = EvaluationResult.objects.create(
-# #             dataset=dataset,
-# #             prompt=Prompt.objects.get(id=prompt),
-# #             llm_response=llm_response,
-# #             correctness_score=8.5,
-# #             faithfulness_score=9.0,
-# #         )
-# #         return Response(EvaluationResultSerializer(result).data)
-
-
-# from rest_framework.views import APIView
-# from rest_framework.response import Response
-# from rest_framework import status
-# from django.utils.datastructures import MultiValueDictKeyError
-
-# class FileUploadView(APIView):
-
-#     def post(self, request):
-#         file = request.FILES['csv']
-#         dataset = Dataset.objects.create(name=file.name, file=file)
-#         return Response(DatasetSerializer(dataset).data, status=status.HTTP_201_CREATED)
-
-
 import pandas as pd
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -57,10 +6,15 @@ from .models import Dataset
 from .serializers import DatasetSerializer
 from django.http import JsonResponse
 from django.views import View
-from .models import Dataset, Prompt
+from .models import Dataset, Prompt, EvaluationResult
 import json
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
+from django.shortcuts import get_object_or_404
+from .utils import parse_csv, evaluate_row, calculate_scores, score_responses_with_openai
+import asyncio
+from asgiref.sync import sync_to_async
+
 
 
 
@@ -160,3 +114,83 @@ class DatasetDetailView(View):
         except Exception as e:
             print(e)
             return JsonResponse({"error": str(e)}, status=500)
+
+
+class EvaluateDatasetView(APIView):
+    def post(self, request, dataset_id, prompt_id):
+        prompt = get_object_or_404(Prompt, id=prompt_id)
+        dataset = get_object_or_404(Dataset, id=dataset_id)
+
+        EvaluationResult.objects.filter(dataset=dataset, prompt=prompt).delete()
+
+        # Parse the CSV file
+        file_path = dataset.file.path
+        rows = parse_csv(file_path)
+
+        # Wrap database calls with sync_to_async
+        @sync_to_async
+        def create_evaluation_result(data):
+            return EvaluationResult.objects.create(**data)
+
+        async def process_rows():
+            evaluation_results = []
+            for row in rows:
+                meta = row.get("Meta", "")
+                output = row.get("Output", "")
+
+                prompt_text = prompt.template
+                prompt_text_formatted = prompt_text.format(Meta=meta) + 'Please provide a short answer.'
+
+                responses = await evaluate_row(prompt_text_formatted, ["groq", "gemini"])
+        
+
+                groq_response = responses[0]['groq']
+                gemini_response = responses[1].strip()
+
+
+                groq_correctness, groq_faithfulness = await score_responses_with_openai(
+                    prompt_text, groq_response, output
+                )
+                gemini_correctness, gemini_faithfulness = await score_responses_with_openai(
+                    prompt_text, gemini_response, output
+                )
+
+
+                # Prepare the result data
+                result_data = {
+                    'dataset': dataset,
+                    'prompt': prompt,
+                    'output': output,
+                    'groq_llm_response': groq_response,
+                    'gemini_llm_response': gemini_response,
+                    'groq_correctness_score': groq_correctness,
+                    'groq_faithfulness_score': groq_faithfulness,
+                    'gemini_correctness_score': gemini_correctness,
+                    'gemini_faithfulness_score': gemini_faithfulness,
+                    'prompt_text': prompt_text_formatted,
+                }
+
+                # Create evaluation result asynchronously
+                result = await create_evaluation_result(result_data)
+                evaluation_results.append(result)
+
+            return evaluation_results
+
+        # Run the asynchronous processing
+        asyncio.run(process_rows())
+
+        # Return all evaluation results for the given prompt and dataset
+        evaluations = EvaluationResult.objects.filter(prompt=prompt, dataset=dataset)
+        response_data = [
+            {
+                "id": evaluation.id,
+                "groq_response": evaluation.groq_llm_response,
+                "gemini_response": evaluation.gemini_llm_response,
+                "groq_correctness": evaluation.groq_correctness_score,
+                "groq_faithfulness": evaluation.groq_faithfulness_score,
+                "gemini_correctness": evaluation.gemini_correctness_score,
+                "gemini_faithfulness": evaluation.gemini_faithfulness_score,
+            }
+            for evaluation in evaluations
+        ]
+        return JsonResponse(response_data, safe=False)
