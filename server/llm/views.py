@@ -17,7 +17,6 @@ from asgiref.sync import sync_to_async
 
 
 
-
 class FileUploadView(APIView):
 
     def post(self, request):
@@ -53,7 +52,6 @@ class FileUploadView(APIView):
         }, status=status.HTTP_201_CREATED)
 
 
-@method_decorator(ensure_csrf_cookie, name='post')
 class DatasetDetailView(View):
 
     def get(self, request, dataset_id):
@@ -117,7 +115,7 @@ class DatasetDetailView(View):
 
 
 class EvaluateDatasetView(APIView):
-    def post(self, request, dataset_id, prompt_id):
+    def get(self, request, dataset_id, prompt_id):
         prompt = get_object_or_404(Prompt, id=prompt_id)
         dataset = get_object_or_404(Dataset, id=dataset_id)
 
@@ -139,7 +137,7 @@ class EvaluateDatasetView(APIView):
                 output = row.get("Output", "")
 
                 prompt_text = prompt.template
-                prompt_text_formatted = prompt_text.format(Meta=meta) + 'Please provide a short answer.'
+                prompt_text_formatted = prompt_text.format(Meta=meta) + ' Please provide a short answer.'
 
                 responses = await evaluate_row(prompt_text_formatted, ["groq", "gemini"])
         
@@ -148,12 +146,13 @@ class EvaluateDatasetView(APIView):
                 gemini_response = responses[1].strip()
 
 
-                groq_correctness, groq_faithfulness = await score_responses_with_openai(
-                    prompt_text, groq_response, output
-                )
-                gemini_correctness, gemini_faithfulness = await score_responses_with_openai(
-                    prompt_text, gemini_response, output
-                )
+                # groq_correctness, groq_faithfulness = await score_responses_with_openai(
+                #     prompt_text, groq_response, output
+                # )
+
+                # gemini_correctness, gemini_faithfulness = await score_responses_with_openai(
+                #     prompt_text, gemini_response, output
+                # )
 
 
                 # Prepare the result data
@@ -163,10 +162,10 @@ class EvaluateDatasetView(APIView):
                     'output': output,
                     'groq_llm_response': groq_response,
                     'gemini_llm_response': gemini_response,
-                    'groq_correctness_score': groq_correctness,
-                    'groq_faithfulness_score': groq_faithfulness,
-                    'gemini_correctness_score': gemini_correctness,
-                    'gemini_faithfulness_score': gemini_faithfulness,
+                    # 'groq_correctness_score': groq_correctness,
+                    # 'groq_faithfulness_score': groq_faithfulness,
+                    # 'gemini_correctness_score': gemini_correctness,
+                    # 'gemini_faithfulness_score': gemini_faithfulness,
                     'prompt_text': prompt_text_formatted,
                 }
 
@@ -183,13 +182,14 @@ class EvaluateDatasetView(APIView):
         evaluations = EvaluationResult.objects.filter(prompt=prompt, dataset=dataset)
         response_data = [
             {
-                "id": evaluation.id,
                 "groq_response": evaluation.groq_llm_response,
                 "gemini_response": evaluation.gemini_llm_response,
                 "groq_correctness": evaluation.groq_correctness_score,
                 "groq_faithfulness": evaluation.groq_faithfulness_score,
                 "gemini_correctness": evaluation.gemini_correctness_score,
                 "gemini_faithfulness": evaluation.gemini_faithfulness_score,
+                "expected_answer": evaluation.output,
+                "prompt": evaluation.prompt_text,
             }
             for evaluation in evaluations
         ]

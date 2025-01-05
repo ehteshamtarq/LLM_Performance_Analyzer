@@ -11,8 +11,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
-
 async def groq_api_call(prompt_text):
 
     client = Groq(
@@ -46,7 +44,6 @@ async def gemini_api_call(prompt_text):
     model_response = response.text
     return model_response
 
-
 async def evaluate_row(prompt_text_formatted, llm_names):
     responses = []
     
@@ -64,7 +61,6 @@ def calculate_scores(response, expected_output):
     faithfulness = 8  # Placeholder score
     return correctness, faithfulness
 
-
 def parse_csv(file_path):
     rows = []
     with open(file_path, "r") as file:
@@ -72,7 +68,6 @@ def parse_csv(file_path):
         for row in reader:
             rows.append(row)
     return rows
-
 
 async def score_responses_with_openai(prompt_text, response, expected_output):
 
