@@ -1,13 +1,11 @@
 import os
 import csv
-import aiohttp
-import asyncio
+import re
 import google.generativeai as genai
 from groq import Groq
-from .models import EvaluationResult  # Assuming the model exists for storing results
-from openai import OpenAI
-import re
 from dotenv import load_dotenv
+
+# from openai import OpenAI
 
 load_dotenv()
 
@@ -17,7 +15,6 @@ async def groq_api_call(prompt_text):
     api_key = os.getenv('GROQ_API_KEY')
     )
 
-    # Making a request to the Groq API (no 'await' needed here)
     chat_completion = client.chat.completions.create(
         messages=[{
             "role": "user",
@@ -26,12 +23,10 @@ async def groq_api_call(prompt_text):
         model="llama-3.3-70b-versatile",
     )
 
-    # Assuming chat_completion contains a 'choices' field, access like this:
     if hasattr(chat_completion, 'choices') and len(chat_completion.choices) > 0:
         model_response = chat_completion.choices[0].message.content
         return {"groq": model_response}
     else:
-        # Return an error message if the expected structure isn't found
         return {"groq": "Error: Response structure unexpected."}
 
 async def gemini_api_call(prompt_text):
@@ -40,26 +35,18 @@ async def gemini_api_call(prompt_text):
     model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content(prompt_text)
     
-    # Extract the response text
     model_response = response.text
     return model_response
 
 async def evaluate_row(prompt_text_formatted, llm_names):
     responses = []
     
-    # Loop through the requested LLMs (e.g., Groq and Gemini)
     if "groq" in llm_names:
         responses.append(await groq_api_call(prompt_text_formatted))
     if "gemini" in llm_names:
         responses.append(await gemini_api_call(prompt_text_formatted))
     
     return responses
-
-def calculate_scores(response, expected_output):
-    # Placeholder scoring logic (replace with actual scoring algorithms)
-    correctness = 10 if expected_output in response else 5
-    faithfulness = 8  # Placeholder score
-    return correctness, faithfulness
 
 def parse_csv(file_path):
     rows = []
@@ -98,7 +85,6 @@ async def score_responses_with_openai(prompt_text, response, expected_output):
 
     genai.configure(api_key=os.getenv('GENAI_API_KEY'))
 
-    # Formulate a prompt for Gemini to evaluate correctness and faithfulness
     scoring_prompt = (
         f"Evaluate the response below based on the correctness and faithfulness to the provided prompt "
         f"and expected output. Provide scores out of 10 as clean numerical values:\n\n"
@@ -108,7 +94,6 @@ async def score_responses_with_openai(prompt_text, response, expected_output):
         f"Correctness (numerical value only):\nFaithfulness (numerical value only):"
     )
 
-    # Use Gemini for scoring
     model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content(scoring_prompt)
 
@@ -122,9 +107,8 @@ async def score_responses_with_openai(prompt_text, response, expected_output):
         if not correctness_match or not faithfulness_match:
             raise ValueError("Could not extract scores from response.")
 
-        # Extract and convert scores to float
-        correctness = (correctness_match.group(1))
-        faithfulness = (faithfulness_match.group(1))
+        correctness = correctness_match.group(1)
+        faithfulness = faithfulness_match.group(1)
 
 
     except Exception as e:
