@@ -62,6 +62,7 @@ const home = () => {
     <Navbar/>
     <div className="upload">
       <h2>Upload CSV File</h2>
+      <h4>CSV File must contain Input, Output and Meta columns</h4>
       <input type="file" accept=".csv" onChange={handleFileChange} />
       <button onClick={handleFileUpload} disabled={!file || loading}>
         {loading ? "Uploading..." : "Upload and Send to Backend"}
