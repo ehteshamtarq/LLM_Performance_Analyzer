@@ -27,3 +27,37 @@ th, td{
     padding: 8px;
     text-align:center;
 }
+
+.average_stats{
+    display:flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 30px;
+}
+
+.stats_heading{
+    margin-top: 150px;
+    margin-left: 20px;
+}
+
+.average_stats table{
+    width: 40%;
+}
+
+th, td{
+    width: 100px;
+    padding: 8px;
+}
+
+.green{
+    background-color: #4CAF50;
+    font-weight: 700;
+    font-size: 16px;
+    color: white;
+}
+
+table{
+    border-radius: 0px;
+}

@@ -29,6 +29,18 @@ const resultPage = () => {
     fetchData();
   }, []); 
 
+
+  const calculateAverage = (key) => {
+    const total = data.reduce((sum, item) => sum + parseFloat(item[key] || 0), 0);
+    return total / data.length;
+  };
+
+
+  const avgGroqCorrectness = calculateAverage('groq_correctness');
+  const avgGroqFaithfulness = calculateAverage('groq_faithfulness');
+  const avgGeminiCorrectness = calculateAverage('gemini_correctness');
+  const avgGeminiFaithfulness = calculateAverage('gemini_faithfulness');
+
   if (loading) 
     return (
       <>
@@ -76,6 +88,35 @@ const resultPage = () => {
               <td>{item.gemini_faithfulness}</td>
             </tr>
           ))}
+        </tbody>
+      </table>
+    </div>
+
+
+    <div className="stats_heading"><h2>Average Stats</h2></div>
+    <div className="average_stats">
+    <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Groq</th>
+            <th>Gemini</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr>
+              <td className="green">Correctness</td>
+              <td>{avgGroqCorrectness}</td>
+              <td>{avgGeminiCorrectness}</td>
+            </tr>
+        </tbody>
+
+        <tbody>
+            <tr>
+              <td className="green">Faithfullness</td>
+              <td>{avgGroqFaithfulness}</td>
+              <td>{avgGeminiFaithfulness}</td>
+            </tr>
         </tbody>
       </table>
     </div>
