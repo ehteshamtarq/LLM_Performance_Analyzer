@@ -44,21 +44,18 @@ class FileUploadView(APIView):
             "dataset": DatasetSerializer(dataset).data,
         }, status=status.HTTP_201_CREATED)
 
+class DatasetDetailView(APIView):
 
-class DatasetDetailView(View):
-
-    def get(self, request, dataset_id):
+    def get(self, request, dataset_id, *args, **kwargs):
         try:
             dataset = Dataset.objects.get(id=dataset_id)
 
             dataset_file_path = dataset.file.path
-
             df = pd.read_csv(dataset_file_path)
 
-            dataset_rows = df.to_dict(orient='records')  
+            dataset_rows = df.to_dict(orient='records')
 
             prompts = Prompt.objects.all()
-
             prompts_data = [{"prompt_id": prompt.id, "prompt_template": prompt.template} for prompt in prompts]
 
             response = {
@@ -67,35 +64,32 @@ class DatasetDetailView(View):
                 "prompts": prompts_data,
             }
 
-            return JsonResponse(response, status=200)
+            return Response(response, status=status.HTTP_200_OK)
 
         except Dataset.DoesNotExist:
-            return JsonResponse({"error": "Dataset not found."}, status=404)
+            return Response({"error": "Dataset not found."}, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
-            print(e)
-            return JsonResponse({"error": str(e)}, status=500)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def post(self, request, dataset_id):
-        data = json.loads(request.body)
-        prompt_text = data.get("prompt").strip()
+    def post(self, request, dataset_id, *args, **kwargs):
+        data = request.data
+        prompt_text = data.get("prompt", "").strip()
 
         try:
             existing_prompt = Prompt.objects.filter(template=prompt_text).first()
 
             if existing_prompt:
-                return JsonResponse({"message": "Prompt already exists.", "prompt_id": existing_prompt.id}, status=200)
+                return Response({"message": "Prompt already exists.", "prompt_id": existing_prompt.id}, status=status.HTTP_200_OK)
 
             new_prompt = Prompt.objects.create(template=prompt_text)
-            return JsonResponse({"message": "Prompt added successfully.", "prompt_id": new_prompt.id}, status=201)
+            return Response({"message": "Prompt added successfully.", "prompt_id": new_prompt.id}, status=status.HTTP_201_CREATED)
 
         except Dataset.DoesNotExist:
-            return JsonResponse({"error": "Dataset not found."}, status=404)
+            return Response({"error": "Dataset not found."}, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
-            print(e)
-            return JsonResponse({"error": str(e)}, status=500)
-
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class EvaluateDatasetView(APIView):
     def get(self, request, dataset_id, prompt_id):
