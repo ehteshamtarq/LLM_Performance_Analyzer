@@ -12,7 +12,7 @@ docker run -p 8080:8080 my-django-app
 ```bash
 cd client
 npm install
-npm run dev
+npm run build
 cd ..
 docker build -t my-react-app -f ./client/dockerfile .
 docker run -p 5173:5173 my-react-app
