@@ -1,5 +1,14 @@
 # LLM_Performance_Analyzer
 
+
+> **Note:** Use a small csv file to evaluate both the llm models as they allow only limited number of api request
+> You can use the below file 
+
+
+[Capital Country]([URL](https://drive.google.com/file/d/1Iqcje8D5NSSKCH1mb32L5T9rCiJJnTPk/view?usp=sharing))
+[English To French]([URL](https://drive.google.com/file/d/1Al7oN3vgpeT6qnwwx9kUiMi4K_XPqnVK/view?usp=sharing))
+
+
 ## Run Backend
 
 ```bash
