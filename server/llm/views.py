@@ -122,11 +122,11 @@ class EvaluateDatasetView(APIView):
 
 
                 groq_correctness, groq_faithfulness = await score_responses_with_openai(
-                    prompt_text, groq_response, output
+                    prompt_text_formatted, groq_response, output
                 )
 
                 gemini_correctness, gemini_faithfulness = await score_responses_with_openai(
-                    prompt_text, gemini_response, output
+                    prompt_text_formatted, gemini_response, output
                 )
 
 

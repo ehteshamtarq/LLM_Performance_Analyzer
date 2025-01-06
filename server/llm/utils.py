@@ -88,9 +88,9 @@ async def score_responses_with_openai(prompt_text, response, expected_output):
     scoring_prompt = (
         f"Evaluate the response below based on the correctness and faithfulness to the provided prompt "
         f"and expected output. Provide scores out of 10 as clean numerical values:\n\n"
-        f"Prompt: {prompt_text}\n"
-        f"Expected Output: {expected_output}\n"
-        f"Response: {response}\n\n"
+        f"Prompt: {prompt_text.lower()}\n"  # Make the prompt text lowercase
+        f"Expected Output: {expected_output.lower()}\n"  # Make the expected output lowercase
+        f"Response: {response.lower()}\n\n"  # Make the response lowercase
         f"Correctness (numerical value only):\nFaithfulness (numerical value only):"
     )
 
