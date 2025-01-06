@@ -1,0 +1,20 @@
+# Use the official Python 3.10.12 image as the base image
+FROM python:3.10.12
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the server code from your local machine
+COPY /server /app
+
+# Downgrade pip to version 22
+RUN pip install --upgrade pip==24.3.1
+
+# Install dependencies from requirements.txt
+RUN pip install -r requirements.txt
+
+# Expose port 8080
+EXPOSE 8080
+
+# Default command to run the Django development server
+CMD ["python3", "manage.py", "runserver", "0.0.0.0:8080"]

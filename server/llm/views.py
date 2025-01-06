@@ -146,13 +146,13 @@ class EvaluateDatasetView(APIView):
                 gemini_response = responses[1].strip()
 
 
-                # groq_correctness, groq_faithfulness = await score_responses_with_openai(
-                #     prompt_text, groq_response, output
-                # )
+                groq_correctness, groq_faithfulness = await score_responses_with_openai(
+                    prompt_text, groq_response, output
+                )
 
-                # gemini_correctness, gemini_faithfulness = await score_responses_with_openai(
-                #     prompt_text, gemini_response, output
-                # )
+                gemini_correctness, gemini_faithfulness = await score_responses_with_openai(
+                    prompt_text, gemini_response, output
+                )
 
 
                 # Prepare the result data
@@ -162,10 +162,10 @@ class EvaluateDatasetView(APIView):
                     'output': output,
                     'groq_llm_response': groq_response,
                     'gemini_llm_response': gemini_response,
-                    # 'groq_correctness_score': groq_correctness,
-                    # 'groq_faithfulness_score': groq_faithfulness,
-                    # 'gemini_correctness_score': gemini_correctness,
-                    # 'gemini_faithfulness_score': gemini_faithfulness,
+                    'groq_correctness_score': groq_correctness,
+                    'groq_faithfulness_score': groq_faithfulness,
+                    'gemini_correctness_score': gemini_correctness,
+                    'gemini_faithfulness_score': gemini_faithfulness,
                     'prompt_text': prompt_text_formatted,
                 }
 

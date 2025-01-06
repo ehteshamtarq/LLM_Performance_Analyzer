@@ -33,7 +33,7 @@ const resultPage = () => {
     return (
       <>
       <Navbar />
-      <div className="flex">Loading...</div>
+      <div className="flex blue">Loading...</div>
       </>
       );
 
@@ -41,7 +41,7 @@ const resultPage = () => {
     return (
       <>
       <Navbar />
-      <div className="flex">Error: {error}</div>);
+      <div className="flex red">Error: {error}</div>);
       </>
     )
 
@@ -49,7 +49,7 @@ const resultPage = () => {
     <>
     <Navbar />
      <div className="table-section">
-      <h2 className="heading">Responses Data</h2>
+      <h2 className="heading">Results</h2>
       <table style={{ width: "100%" }}>
         <thead>
           <tr>

@@ -71,10 +71,34 @@ def parse_csv(file_path):
 
 async def score_responses_with_openai(prompt_text, response, expected_output):
 
-    client = OpenAI(
-        api_key= os.getenv('OPENAI_API_KEY')
-    )
+    # client = OpenAI(
+    #     api_key= os.getenv('OPENAI_API_KEY')
+    # )
 
+    # scoring_prompt = (
+    #     f"Evaluate the response below based on the correctness and faithfulness to the provided prompt "
+    #     f"and expected output. Provide scores out of 10 as clean numerical values:\n\n"
+    #     f"Prompt: {prompt_text}\n"
+    #     f"Expected Output: {expected_output}\n"
+    #     f"Response: {response}\n\n"
+    #     f"Correctness (numerical value only):\nFaithfulness (numerical value only):"
+    # )
+
+
+    # completion = client.chat.completions.create(
+    #     model="gpt-4o-mini",
+    #     store=True,
+    #     messages=[
+    #         {"role": "user", "content": scoring_prompt}
+    #     ]
+    # )
+
+    # scores = completion.choices[0].message.content
+
+
+    genai.configure(api_key=os.getenv('GENAI_API_KEY'))
+
+    # Formulate a prompt for Gemini to evaluate correctness and faithfulness
     scoring_prompt = (
         f"Evaluate the response below based on the correctness and faithfulness to the provided prompt "
         f"and expected output. Provide scores out of 10 as clean numerical values:\n\n"
@@ -84,19 +108,14 @@ async def score_responses_with_openai(prompt_text, response, expected_output):
         f"Correctness (numerical value only):\nFaithfulness (numerical value only):"
     )
 
+    # Use Gemini for scoring
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    response = model.generate_content(scoring_prompt)
 
-    completion = client.chat.completions.create(
-        model="gpt-4o-mini",
-        store=True,
-        messages=[
-            {"role": "user", "content": scoring_prompt}
-        ]
-    )
-
-    scores = completion.choices[0].message.content
+    scores = response.text 
 
     try:
-        # Flexible regex to capture numbers for both Correctness and Faithfulness
+        
         correctness_match = re.search(r"Correctness:\s*(\d+(\.\d+)?)", scores, re.IGNORECASE)
         faithfulness_match = re.search(r"Faithfulness:\s*(\d+(\.\d+)?)", scores, re.IGNORECASE)
 
@@ -106,6 +125,7 @@ async def score_responses_with_openai(prompt_text, response, expected_output):
         # Extract and convert scores to float
         correctness = (correctness_match.group(1))
         faithfulness = (faithfulness_match.group(1))
+
 
     except Exception as e:
         raise ValueError(f"Unexpected response format: {scores}") from e
